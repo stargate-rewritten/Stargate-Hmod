@@ -24,7 +24,7 @@ public class Stargate extends ThreadedPlugin {
     private HashMap<Integer, Location> vehicles = new HashMap<Integer, Location>();
 
     public Stargate() { 
-        super("Stargate", 2.0f, "stargates/stargate");
+        super("Stargate", 2.01f, "stargates/stargate");
         
         File oldFile = new File("stargates.txt");
         if (oldFile.exists())
@@ -102,7 +102,12 @@ public class Stargate extends ThreadedPlugin {
         Portal destination = gate.getDestination();
 
         if (!gate.isOpen()) {
-            if ((destination == null) || (destination == gate)) {
+        	if ((!gate.isFixed()) && (gate.getActivePlayer() != player)) {
+        		gate.deactivate();
+                if (!noownersMessage.isEmpty()) {
+                    player.sendMessage(Colors.Red + noownersMessage);
+                }
+        	} else if ((destination == null) || (destination == gate)) {
                 if (!unselectMessage.isEmpty()) {
                     player.sendMessage(Colors.Red + unselectMessage);
                 }
@@ -159,7 +164,7 @@ public class Stargate extends ThreadedPlugin {
 
                 if (portal != null) {
                     if ((!portal.isOpen()) && (!portal.isFixed())) {
-                        portal.cycleDestination();
+                        portal.cycleDestination(player);
                     }
                 }
             }
@@ -217,7 +222,7 @@ public class Stargate extends ThreadedPlugin {
 
         @Override
         public void onSignShow(Player player, Sign signBlock) {
-            Portal portal = Portal.getByBlock(etc.getServer().getBlockAt(signBlock.getX(), signBlock.getY(), signBlock.getZ()));
+            Portal portal = Portal.getByBlock(signBlock.getBlock());
             
             if (portal == null) return;
             

@@ -40,15 +40,17 @@ public class Portal {
     private String network;
     private Gate gate;
     private boolean isOpen = false;
+    private boolean hidden = false;
     private String owner = "";
     private HashMap<Block, Integer> exits;
     private HashMap<Integer, Block> reverseExits;
+    private Player activePlayer;
 
     private Portal(Blox topLeft, int modX, int modZ,
             float rotX, SignPost id, Blox button,
             String dest, String name,
             boolean verified, String network, Gate gate,
-            String owner) {
+            String owner, Boolean hidden) {
         this.topLeft = topLeft;
         this.modX = modX;
         this.modZ = modZ;
@@ -63,6 +65,7 @@ public class Portal {
         this.name = name;
         this.gate = gate;
         this.owner = owner;
+        this.hidden = hidden;
 
         this.register();
         if (verified) {
@@ -79,9 +82,6 @@ public class Portal {
     }
 
     private boolean pastGrace() {
-        if (isFixed()) {
-            return false; // ignore fixed gates.
-        }
         if (manipGrace(false, false)) {
             return manipGrace(true, false);
         }
@@ -92,7 +92,11 @@ public class Portal {
     }
 
     public boolean isOpen() {
-        return isOpen || isFixed();
+        return isOpen;
+    }
+    
+    public boolean isHidden() {
+    	return hidden;
     }
 
     public boolean open() {
@@ -100,11 +104,7 @@ public class Portal {
     }
 
     public boolean open(Player openFor) {
-        return open(openFor, isFixed());
-    }
-
-    public boolean open(Player openFor, boolean force) {
-        if (isOpen() && !force) return false;
+        if (isOpen()) return false;
 
         etc.getServer().loadChunk(topLeft.getBlock());
 
@@ -113,13 +113,14 @@ public class Portal {
         }
 
         isOpen = true;
+        // Open remote gate
         if (!isFixed()) {
             player = openFor;
             manipGrace(true, true);
 
             Portal end = getDestination();
             if (end != null && !end.isOpen() && end.getDestination() == null) {
-                end.open(openFor, false);
+                end.open(openFor);
                 end.setDestination(this);
                 if (end.isVerified()) end.drawSign(true);
             }
@@ -129,13 +130,13 @@ public class Portal {
     }
 
     public void close(boolean force) {
-        if (fixed && !force) return;
-
+        if (!fixed) {
         Portal end = getDestination();
 
         if (end != null && end.isOpen()) {
             end.deactivate(); // Clear it's destination first.
             end.close(false);
+        }
         }
 
         for (Blox inside : getEntrances()) {
@@ -149,7 +150,7 @@ public class Portal {
     }
 
     public boolean isOpenFor(Player player) {
-        if ((isFixed()) || (this.player == null)) {
+        if ((this.player == null)) {
             return true;
         }
         return (player != null) && (player.getName().equalsIgnoreCase(this.player.getName()));
@@ -277,12 +278,19 @@ public class Portal {
         return owner;
     }
 
-    public void activate() {
+    public void activate(Player player) {
         destinations.clear();
-
+        destination = "";
+        drawSign(true);
+        activePlayer = player;
+        Stargate.log("Player: " + player.getName());
         for (String dest : allPortals) {
             Portal portal = getByName(dest);
-            if ((portal.getNetwork().equalsIgnoreCase(network)) && (!dest.equalsIgnoreCase(getName()))) {
+            Stargate.log("Owner: " + portal.getOwner());
+            if (	(portal.getNetwork().equalsIgnoreCase(network)) && 				// In the network
+            		(!dest.equalsIgnoreCase(getName())) && 							// Not this portal
+            		(!portal.isHidden() || player.canUseCommand("/stargatehidden") || portal.getOwner().equals(player.getName()))	// Is not hidden, player can view hidden, or player created
+            	) {
                 destinations.add(dest);
             }
         }
@@ -294,6 +302,7 @@ public class Portal {
         }
         destinations.clear();
         destination = "";
+        activePlayer = null;
         drawSign(true);
     }
 
@@ -301,13 +310,18 @@ public class Portal {
         return fixed || (destinations.size() > 0);
     }
 
+    public Player getActivePlayer() {
+    	return activePlayer;
+    }
+
     public String getNetwork() {
         return network;
     }
 
-    public void cycleDestination() {
-        if (!isActive()) {
-            activate();
+    public void cycleDestination(Player player) {
+    	if (!player.canUseCommand("/stargateuse")) return;
+        if (!isActive() || getActivePlayer() != player) {
+            activate(player);
         }
 
         if (destinations.size() > 0) {
@@ -473,7 +487,7 @@ public class Portal {
         for (String originName : allPortals) {
             Portal origin = Portal.getByName(originName);
 
-            if ((origin != null) && (origin.isFixed()) && (origin.getDestinationName().equalsIgnoreCase(getName())) && (origin.isVerified())) {
+            if ((origin != null) && (origin.isFixed()) && (origin.isOpen()) && (origin.getDestinationName().equalsIgnoreCase(getName())) && (origin.isVerified())) {
                 origin.close(false);
             }
         }
@@ -525,6 +539,7 @@ public class Portal {
         String name = filterName(id.getText(0));
         String destName = filterName(id.getText(1));
         String network = filterName(id.getText(2));
+        Boolean hidden = (filterName(id.getText(3)).length() > 0);
 
         if ((name.length() < 1) || (name.length() > 11) || (getByName(name) != null)) {
             return null;
@@ -597,27 +612,9 @@ public class Portal {
 
         Portal portal = null;
 
-        if (destName.length() > 0) {
-            portal = new Portal(topleft, modX, modZ, rotX, id, null, destName, name, true, network, gate, player.getName());
-
-            Portal destination = getByName(destName);
-            if (destination != null) {
-                portal.open();
-            }
-        } else {
             Blox button = topleft.modRelative(buttonVector.getRight(), buttonVector.getDepth(), buttonVector.getDistance() + 1, modX, 1, modZ);
             button.setType(BUTTON);
-
-            portal = new Portal(topleft, modX, modZ, rotX, id, button, "", name, true, network, gate, player.getName());
-        }
-
-        for (String originName : allPortals) {
-            Portal origin = Portal.getByName(originName);
-
-            if ((origin != null) && (origin.isFixed()) && (origin.getDestinationName().equalsIgnoreCase(portal.getName())) && (origin.isVerified())) {
-                origin.open();
-            }
-        }
+            portal = new Portal(topleft, modX, modZ, rotX, id, button, destName, name, true, network, gate, player.getName(), hidden);
 
         saveAllGates();
 
@@ -673,6 +670,8 @@ public class Portal {
                 builder.append(portal.getNetwork());
                 builder.append(':');
                 builder.append(portal.getOwner());
+                builder.append(':');
+                builder.append(portal.isHidden());
 
                 bw.append(builder.toString());
                 bw.newLine();
@@ -701,7 +700,7 @@ public class Portal {
                         continue;
                     }
                     String[] split = line.split(":");
-                    if (split.length < 3) {
+                    if (split.length < 8) {
                         continue;
                     }
                     String name = split[0];
@@ -716,30 +715,13 @@ public class Portal {
                     String fixed = (split.length > 8) ? split[8] : "";
                     String network = (split.length > 9) ? split[9] : Stargate.getDefaultNetwork();
                     String owner = (split.length > 10) ? split[10] : "";
+                    Boolean hidden = (split.length > 11) ? split[11].equalsIgnoreCase("true") : false;
 
                     if (fixed.length() > 0) {
                         network = "";
                     }
 
-                    Portal portal = new Portal(topLeft, modX, modZ, rotX, sign, button, fixed, name, false, network, gate, owner);
-
-                    if (fixed.length() > 0) {
-                        if (portal.isVerified()) {
-                            Portal destination = getByName(fixed);
-
-                            if (destination != null) {
-                                portal.open();
-                            }
-                        }
-                    }
-
-                    for (String originName : allPortals) {
-                        Portal origin = Portal.getByName(originName);
-
-                        if ((origin != null) && (origin.isFixed()) && (origin.getDestinationName().equalsIgnoreCase(portal.getName())) && (origin.isVerified())) {
-                            origin.open();
-                        }
-                    }
+                    new Portal(topLeft, modX, modZ, rotX, sign, button, fixed, name, false, network, gate, owner, hidden);
                 }
                 scanner.close();
             } catch (Exception e) {
