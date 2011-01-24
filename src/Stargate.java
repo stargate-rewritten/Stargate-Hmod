@@ -111,7 +111,7 @@ public class Stargate extends ThreadedPlugin {
                 if (!unselectMessage.isEmpty()) {
                     player.sendMessage(Colors.Red + unselectMessage);
                 }
-            } else if ((destination.isOpen() || destination.isFixed())) {
+            } else if ((destination.isOpen())) {
                 if (!collisinMessage.isEmpty()) {
                     player.sendMessage(Colors.Red + collisinMessage);
                 }
