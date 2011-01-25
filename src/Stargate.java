@@ -24,7 +24,7 @@ public class Stargate extends ThreadedPlugin {
     private HashMap<Integer, Location> vehicles = new HashMap<Integer, Location>();
 
     public Stargate() { 
-        super("Stargate", 2.01f, "stargates/stargate");
+        super("Stargate", 2.02f, "stargates/stargate");
         
         File oldFile = new File("stargates.txt");
         if (oldFile.exists())
@@ -111,12 +111,12 @@ public class Stargate extends ThreadedPlugin {
                 if (!unselectMessage.isEmpty()) {
                     player.sendMessage(Colors.Red + unselectMessage);
                 }
-            } else if ((destination.isOpen())) {
+            } else if ((destination.isOpen()) && (!destination.isFixed())) {
                 if (!collisinMessage.isEmpty()) {
                     player.sendMessage(Colors.Red + collisinMessage);
                 }
             } else if (gate.getGate().deductCost(Gate.CostFor.Activating, player)) {
-                gate.open(player);
+                gate.open(player, false);
             } else {
                 if (!cantAffordToUse.isEmpty()) {
                     player.sendMessage(Colors.Red + cantAffordToUse);

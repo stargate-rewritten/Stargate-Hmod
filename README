@@ -1,3 +1,12 @@
+Changes in 2.01:
+ - Implemented hidden gates, great way for creating hidden rooms, etc.
+ - Fixed gates are now not always-on. When created they will have a button to enable them. They do not open the destination gate.
+ - Destination signs are reloaded if a different user tries to toggle them or open the gate.
+ 
+Changes in 2.02:
+ - The 4th line is now a config line for per-gate options.
+ - Re-added ability to have always-on gates, use the 'A' option to enable.
+
 Installation:
  - Move Stargate.jar to your /plugins/ location
  - Open up your server.properties file and add "Stargate" to your "plugins" line. It's case sensitive, and if there's already text there seperate them with a comma (",")
@@ -10,6 +19,12 @@ Building a gate:
    O  O
     OO
  - Type a name on the first line on the sign, it must be less than 12 characters long.
+ 
+Sign Layout:
+ - Line 1: Gate Name (Max 12 characters)
+ - Line 2: Destination Name (Max 12 characters, used for fixed-gate)
+ - Line 3: Network name (Max 12 characters)
+ - Line 4: Options ('A' for always-on fixed gate, 'H' for hidden networked gate)
 
 Using a gate:
  - Right click the sign to choose a destination.
@@ -21,6 +36,7 @@ Fixed gates:
  - If you create two fixed gates that point to eachother, you will have a two-way portal.
  - You can link gates to normal gates, or to other fixed gates which can link to another fixed gate etc. You can't link a normal gate to a fixed gate though.
  - Creating a fixed gate is the same as a normal gate, but you must specify the destination on the second line.
+ - Set the 4th line to "A" to enable an always-open fixed gate.
 
 Gate networks:
  - Gates are all part of a network, by default this is "central".
@@ -30,7 +46,7 @@ Gate networks:
 Hidden Gates:
  - Hidden gates are like normal gates, but only show on the destination list of other gates under certain conditions.
  - They are visible to anyone with access to the /stargatehidden command, or to the creator of the hidden gate.
- - To create a hidden gate, put any text on the 4th line of the sign.
+ - Set the 4th line to "H" to make it a hidden gate.
  
 Configuration:
  - You can edit all values in stargate.txt to your choosing, mostly the RP text on doing actions involving a gate.
@@ -41,8 +57,3 @@ Permissions: (These are not in-game commands, just used for permission checking)
  - Creating gates is restricted to users with the /stargatecreate command permission
  - Using gates is restricted to users with the /stargateuse command permission
  - Viewing every hidden gate is restricted to users with the /stargatehidden command permission
- 
-Changes in 2.01:
- - Implemented hidden gates, great way for creating hidden rooms, etc.
- - Fixed gates are now not always-on. When created they will have a button to enable them. They do not open the destination gate.
- - Destination signs are reloaded if a different user tries to toggle them or open the gate.
