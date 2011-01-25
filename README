@@ -1,11 +1,14 @@
-Changes in 2.01:
- - Implemented hidden gates, great way for creating hidden rooms, etc.
- - Fixed gates are now not always-on. When created they will have a button to enable them. They do not open the destination gate.
- - Destination signs are reloaded if a different user tries to toggle them or open the gate.
+Changes in 2.03: 
+ - You can now right click on the button to activate a gate, bypasses spawn protect issues.
  
 Changes in 2.02:
  - The 4th line is now a config line for per-gate options.
  - Re-added ability to have always-on gates, use the 'A' option to enable.
+ 
+Changes in 2.01:
+ - Implemented hidden gates, great way for creating hidden rooms, etc.
+ - Fixed gates are now not always-on. When created they will have a button to enable them. They do not open the destination gate.
+ - Destination signs are reloaded if a different user tries to toggle them or open the gate.
 
 Installation:
  - Move Stargate.jar to your /plugins/ location
@@ -28,7 +31,7 @@ Sign Layout:
 
 Using a gate:
  - Right click the sign to choose a destination.
- - Left click the button to open up a portal.
+ - Left or Right click the button to open up a portal.
  - Step through.
  
 Fixed gates:

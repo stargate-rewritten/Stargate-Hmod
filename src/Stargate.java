@@ -24,7 +24,7 @@ public class Stargate extends ThreadedPlugin {
     private HashMap<Integer, Location> vehicles = new HashMap<Integer, Location>();
 
     public Stargate() { 
-        super("Stargate", 2.02f, "stargates/stargate");
+        super("Stargate", 2.03f, "stargates/stargate");
         
         File oldFile = new File("stargates.txt");
         if (oldFile.exists())
@@ -167,6 +167,16 @@ public class Stargate extends ThreadedPlugin {
                         portal.cycleDestination(player);
                     }
                 }
+            }
+            
+            // Implement right-click to toggle a stargate, gets around spawn protection problem.
+            if ((block.getType() == Portal.BUTTON)) {
+            	if (player.canUseCommand("/stargateuse")) {
+            		Portal portal = Portal.getByBlock(block);
+            		if (portal != null) {
+            			onButtonPressed(player, portal);
+            		}
+            	}
             }
         }
 
