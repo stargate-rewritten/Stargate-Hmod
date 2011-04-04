@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.SynchronousQueue;
@@ -198,11 +197,11 @@ public class Stargate extends ThreadedPlugin {
                 }
 
                 return true;
-            } else if (block.getStatus() < 2) {
+            } else if (block.getStatus() < 1) {
                 if (!player.canUseCommand("/stargatedestroy")) {
                     return true;
                 }
-            } else if (block.getStatus() == 3) {
+            } else if (block.getStatus() == 2) {
                 if (!player.canUseCommand("/stargatedestroy")) {
                     return true;
                 }
