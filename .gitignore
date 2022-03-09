@@ -1,0 +1,11 @@
+/bin/
+/lib/
+/libs/
+/build/
+.gradle
+.settings
+.git
+.classpath
+.project
+minecraft_servero.jar
+.idea/
