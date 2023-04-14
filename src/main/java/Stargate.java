@@ -23,7 +23,7 @@ public class Stargate extends ThreadedPlugin {
     private HashMap<Integer, Location> vehicles = new HashMap<Integer, Location>();
 
     public Stargate() { 
-        super("Stargate", 2.03f, "stargates/stargate");
+        super("Stargate", 3.01f, "stargates/stargate");
         
         File oldFile = new File("stargates.txt");
         if (oldFile.exists())
